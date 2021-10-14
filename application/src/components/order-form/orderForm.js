@@ -5,6 +5,8 @@ import { SERVER_IP } from '../../private';
 import './orderForm.css';
 
 const ADD_ORDER_URL = `${SERVER_IP}/api/add-order`
+const EDIT_ORDER_URL = `${SERVER_IP}/api/edit-order`
+let editOrderVariable = false;
 
 const mapStateToProps = (state) => ({
     auth: state.auth,
@@ -13,10 +15,52 @@ const mapStateToProps = (state) => ({
 class OrderForm extends Component {
     constructor(props) {
         super(props);
+        console.log(props, ' the props from the constructor')
         this.state = {
             order_item: "",
-            quantity: "1"
+            quantity: "1",
         }
+    }
+
+    componentDidMount() {        
+        if (this.props.match.params.id != null) {
+            console.log(this.props.match.params.id, ' the id');
+            this.getOrder(this.props.match.params.id);
+            this.editOrderVariable = true;
+            // this.setState({
+            //     id: props.match.params.id,
+            // });
+
+        }        // if (this.props.id !== prevProps.id) {
+        //     // fetch or other component tasks necessary for rendering
+        //     console.log(this.props, ' the current state of the props')
+        //   }
+        // fetch(`${SERVER_IP}/api/current-orders`)
+        //     .then(response => response.json())
+        //     .then(response => {
+        //         if(response.success) {
+        //             this.setState({ orders: response.orders });
+        //         } else {
+        //             console.log('Error getting orders');
+        //         }
+        //     });
+    }
+
+    getOrder(id) {
+        fetch(`${SERVER_IP}/api/current-orders`)
+        .then(response => response.json())
+        .then(response => {
+            if(response.success) {
+                let orderToEdit = response.orders.find((order) => id === order._id)
+                this.setState({
+                    id: orderToEdit._id,
+                    order_item: orderToEdit.order_item === null ? "" : orderToEdit.order_item,
+                    quantity: orderToEdit.quantity == null ? "1": orderToEdit.quantity 
+                });
+            } else {
+                console.log('Error getting orders');
+            }
+        });
     }
 
     menuItemChosen(event) {
@@ -47,6 +91,37 @@ class OrderForm extends Component {
         .catch(error => console.error(error));
     }
 
+    editOrder(event) {
+        event.preventDefault();
+        if (this.state.order_item === "") return;
+        console.log(' this.state', this.state)
+        fetch(EDIT_ORDER_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: this.state.id,
+                order_item: this.state.order_item,
+                quantity: this.state.quantity,
+                ordered_by: this.props.auth.email || 'Unknown!',
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(response => console.log("Success", JSON.stringify(response)))
+        .catch(error => console.error(error));
+    }
+
+    upsertOrder(event, editOrderVariable) {
+        if (editOrderVariable) {
+            this.editOrder(event);
+        }
+        else {
+            this.submitOrder(event);
+        }
+    }
+
+
     render() {
         return (
             <Template>
@@ -73,7 +148,7 @@ class OrderForm extends Component {
                             <option value="5">5</option>
                             <option value="6">6</option>
                         </select>
-                        <button type="button" className="order-btn" onClick={(event) => this.submitOrder(event)}>Order It!</button>
+                        <button type="button" className="order-btn" onClick={(event) => this.upsertOrder(event, this.editOrderVariable)}>Order It!</button>
                     </form>
                 </div>
             </Template>

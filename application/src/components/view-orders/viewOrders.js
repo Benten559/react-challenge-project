@@ -1,8 +1,10 @@
 import React, { Component } from 'react';
 import { Template } from '../../components';
 import { SERVER_IP } from '../../private';
+import { Link } from "react-router-dom";
 import './viewOrders.css';
 
+const DELETE_ORDER_URL = `${SERVER_IP}/api/delete-order`
 class ViewOrders extends Component {
     state = {
         orders: []
@@ -20,12 +22,30 @@ class ViewOrders extends Component {
             });
     }
 
+    deleteOrder(event, _id) {
+        event.preventDefault();
+        if (this.state.order_item === "") return;
+        fetch(DELETE_ORDER_URL, {
+            method: 'POST',
+            body: JSON.stringify({
+                id: _id,
+            }),
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(response => window.location.reload())
+        .catch(error => console.error(error));
+    }
+
     render() {
         return (
             <Template>
                 <div className="container-fluid">
                     {this.state.orders.map(order => {
                         const createdDate = new Date(order.createdAt);
+                        const editLink = "/order/" + order._id;
                         return (
                             <div className="row view-order-container" key={order._id}>
                                 <div className="col-md-4 view-order-left-col p-3">
@@ -37,8 +57,10 @@ class ViewOrders extends Component {
                                     <p>Quantity: {order.quantity}</p>
                                  </div>
                                  <div className="col-md-4 view-order-right-col">
-                                     <button className="btn btn-success">Edit</button>
-                                     <button className="btn btn-danger">Delete</button>
+                                 <Link to={`/order/${order._id}`} className="btn btn-success">
+                                     Edit
+                                </Link>
+                                     <button className="btn btn-danger" onClick={(event) => this.deleteOrder(event, order._id)}>Delete</button>
                                  </div>
                             </div>
                         );
