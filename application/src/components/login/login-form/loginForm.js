@@ -18,6 +18,7 @@ class LoginForm extends Component {
     e.preventDefault();
     this.props.commenceLogin(this.state.email, this.state.password);
     this.props.onLogin();
+    console.log('login method called')
   }
 
   onChange(key, val) {
