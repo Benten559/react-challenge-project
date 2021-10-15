@@ -6,7 +6,7 @@ import './orderForm.css';
 
 const ADD_ORDER_URL = `${SERVER_IP}/api/add-order`
 const EDIT_ORDER_URL = `${SERVER_IP}/api/edit-order`
-let editOrderVariable = false;
+let editOrderVariable = false
 
 const mapStateToProps = (state) => ({
     auth: state.auth,
@@ -20,30 +20,15 @@ class OrderForm extends Component {
             order_item: "",
             quantity: "1",
         }
+        this.editOrderVariable = false;
     }
 
     componentDidMount() {        
         if (this.props.match.params.id != null) {
-            console.log(this.props.match.params.id, ' the id');
             this.getOrder(this.props.match.params.id);
             this.editOrderVariable = true;
-            // this.setState({
-            //     id: props.match.params.id,
-            // });
 
-        }        // if (this.props.id !== prevProps.id) {
-        //     // fetch or other component tasks necessary for rendering
-        //     console.log(this.props, ' the current state of the props')
-        //   }
-        // fetch(`${SERVER_IP}/api/current-orders`)
-        //     .then(response => response.json())
-        //     .then(response => {
-        //         if(response.success) {
-        //             this.setState({ orders: response.orders });
-        //         } else {
-        //             console.log('Error getting orders');
-        //         }
-        //     });
+        }
     }
 
     getOrder(id) {
@@ -113,6 +98,7 @@ class OrderForm extends Component {
     }
 
     upsertOrder(event, editOrderVariable) {
+        console.log(editOrderVariable, ' the boolean order variable')
         if (editOrderVariable) {
             this.editOrder(event);
         }
